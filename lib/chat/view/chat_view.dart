@@ -138,7 +138,7 @@ class __MessageInputState extends State<_MessageInput> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Color.fromARGB(255, 32, 163, 196),
+                fillColor: Color.fromARGB(65, 9, 119, 146),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
