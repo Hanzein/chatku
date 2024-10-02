@@ -11,16 +11,17 @@ class MyAppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Firebase Auth',
         theme: ThemeData(
           colorScheme: const ColorScheme.light(
               surface: Colors.white,
               onSurface: Colors.black,
-              primary: Color.fromRGBO(206, 147, 216, 1),
+              primary: Color.fromRGBO(9, 119, 146, 1),
               onPrimary: Colors.black,
-              secondary: Color.fromRGBO(244, 143, 177, 1),
+              secondary: Color.fromRGBO(42, 43, 130, 1),
               onSecondary: Colors.white,
-              tertiary: Color.fromRGBO(255, 204, 128, 1),
+              tertiary: Color.fromRGBO(133, 96, 220, 1),
               error: Colors.red,
               outline: Color(0xFF424242)),
         ),
