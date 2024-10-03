@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chatku/chat/bloc/chat_bloc.dart';
+import 'package:chatku/chat/model/message.dart';
 import 'package:intl/intl.dart';
 
 class ChatScreen extends StatelessWidget {
-  const ChatScreen({super.key});
+  final String receiverId;
+
+  const ChatScreen({super.key, required this.receiverId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ChatBloc(),
+      create: (context) => ChatBloc()..add(LoadMessages(receiverId)),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Chat', style: TextStyle(color: Colors.white)),
-          backgroundColor: Color(0xFF097792),
+          title: Text('Chat with $receiverId',
+              style: const TextStyle(color: Colors.white)),
+          backgroundColor: const Color(0xFF097792),
           centerTitle: true,
         ),
         body: BlocBuilder<ChatBloc, ChatState>(
@@ -24,7 +28,7 @@ class ChatScreen extends StatelessWidget {
                 Expanded(
                   child: _ChatMessages(state: state),
                 ),
-                _MessageInput(),
+                _MessageInput(receiverId: receiverId),
               ],
             );
           },
@@ -93,14 +97,16 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMe = message.sender == 'me'; // Adjust based on your Message model
+    final isMe = message.sender == 'me';
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
-          color: isMe ? Color(0xFF48CAE4) : Color(0xFF097792),
+          color: isMe
+              ? const Color.fromARGB(65, 9, 119, 146)
+              : const Color(0xFF097792),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -113,6 +119,10 @@ class _ChatBubble extends StatelessWidget {
 }
 
 class _MessageInput extends StatefulWidget {
+  final String receiverId;
+
+  const _MessageInput({required this.receiverId});
+
   @override
   __MessageInputState createState() => __MessageInputState();
 }
@@ -125,7 +135,7 @@ class __MessageInputState extends State<_MessageInput> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       color: Colors.white,
-      margin: EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           Expanded(
@@ -138,7 +148,7 @@ class __MessageInputState extends State<_MessageInput> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Color.fromARGB(65, 9, 119, 146),
+                fillColor: const Color.fromARGB(65, 9, 119, 146),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
@@ -148,7 +158,9 @@ class __MessageInputState extends State<_MessageInput> {
             icon: const Icon(Icons.send, color: Color(0xFF097792)),
             onPressed: () {
               if (_controller.text.isNotEmpty) {
-                context.read<ChatBloc>().add(SendMessage(_controller.text));
+                context
+                    .read<ChatBloc>()
+                    .add(SendMessage(widget.receiverId, _controller.text));
                 _controller.clear();
               }
             },

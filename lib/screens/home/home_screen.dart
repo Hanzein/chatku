@@ -1,7 +1,7 @@
 import 'package:chatku/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:chatku/chatroom/view/chat_room_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chatku/chat/view/chat_view.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const ChatScreen()),
+            MaterialPageRoute(builder: (context) => ChatRoomSelectionScreen()),
           );
         },
         child: const Icon(Icons.chat),
