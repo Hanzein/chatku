@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -25,9 +28,15 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -39,16 +48,6 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyChx_YAUfGzJltG_7RxcSk893HPyz2_n7E',
-    appId: '1:638957534276:web:59d927ef72fd373c7c1011',
-    messagingSenderId: '638957534276',
-    projectId: 'chatku-8d8c6',
-    authDomain: 'chatku-8d8c6.firebaseapp.com',
-    storageBucket: 'chatku-8d8c6.appspot.com',
-    measurementId: 'G-7NFHP55FCZ',
-  );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCEIBQlx-DoHBdGGSFWgi0656SpmADkeKw',
@@ -65,24 +64,5 @@ class DefaultFirebaseOptions {
     projectId: 'chatku-8d8c6',
     storageBucket: 'chatku-8d8c6.appspot.com',
     iosBundleId: 'com.example.chatku',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBhCyduw6HyzBwTXmwN1qOctUjHzdR_5yo',
-    appId: '1:638957534276:ios:592437de293c5f707c1011',
-    messagingSenderId: '638957534276',
-    projectId: 'chatku-8d8c6',
-    storageBucket: 'chatku-8d8c6.appspot.com',
-    iosBundleId: 'com.example.chatku',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyChx_YAUfGzJltG_7RxcSk893HPyz2_n7E',
-    appId: '1:638957534276:web:7eec2c90a2eb52bf7c1011',
-    messagingSenderId: '638957534276',
-    projectId: 'chatku-8d8c6',
-    authDomain: 'chatku-8d8c6.firebaseapp.com',
-    storageBucket: 'chatku-8d8c6.appspot.com',
-    measurementId: 'G-P0L7N2N1W8',
   );
 }
