@@ -83,8 +83,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               .colorScheme
                               .onSurface
                               .withOpacity(0.5),
-                          labelColor:
-                              Theme.of(context).colorScheme.onSurface,
+                          labelColor: Theme.of(context).colorScheme.onSurface,
                           tabs: const [
                             Padding(
                               padding: EdgeInsets.all(12.0),

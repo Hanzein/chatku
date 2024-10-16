@@ -3,22 +3,99 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chatku/chat/bloc/chat_bloc.dart';
 import 'package:chatku/chat/model/message.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../services/socket_service.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String receiverId;
+  final String receiverName; // Add this line
 
-  const ChatScreen({super.key, required this.receiverId});
+  const ChatScreen({
+    super.key,
+    required this.receiverId,
+    required this.receiverName, // Add this line
+  });
+
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  late SocketService _socketService;
+
+  @override
+  void initState() {
+    super.initState();
+    _socketService = Provider.of<SocketService>(context, listen: false);
+    _setupSocketListeners();
+  }
+
+  void _setupSocketListeners() {
+    _socketService.onNewMessage((data) {
+      context.read<ChatBloc>().add(ReceiveMessage(Message.fromJson(data)));
+    });
+
+    _socketService.onInitialMessages((data) {
+      final messages = (data as List).map((m) => Message.fromJson(m)).toList();
+      context.read<ChatBloc>().add(LoadInitialMessages(messages));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ChatBloc()..add(LoadMessages(receiverId)),
+      create: (context) => ChatBloc()..add(LoadMessages(widget.receiverId)),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Chat with $receiverId',
-              style: const TextStyle(color: Colors.white)),
-          backgroundColor: const Color(0xFF097792),
-          centerTitle: true,
+          backgroundColor: const Color(0xFF4A86F7), // WhatsApp green color
+          leadingWidth: 25, // Adjust this value to fine-tune spacing
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: AssetImage(
+                    'assets/default_avatar.png'), // Replace with actual image
+                radius: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.receiverName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text(
+                      'Online', // You can replace this with actual status
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.videocam, color: Colors.white),
+              onPressed: () {/* Implement video call functionality */},
+            ),
+            IconButton(
+              icon: const Icon(Icons.call, color: Colors.white),
+              onPressed: () {/* Implement voice call functionality */},
+            ),
+            IconButton(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
+              onPressed: () {/* Implement more options menu */},
+            ),
+          ],
         ),
         body: BlocBuilder<ChatBloc, ChatState>(
           builder: (context, state) {
@@ -28,7 +105,7 @@ class ChatScreen extends StatelessWidget {
                 Expanded(
                   child: _ChatMessages(state: state),
                 ),
-                _MessageInput(receiverId: receiverId),
+                _MessageInput(receiverId: widget.receiverId),
               ],
             );
           },
@@ -105,8 +182,8 @@ class _ChatBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: isMe
-              ? const Color.fromARGB(65, 9, 119, 146)
-              : const Color(0xFF097792),
+              ? const Color.fromARGB(61, 57, 145, 245)
+              : const Color.fromARGB(255, 135, 170, 236),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -117,6 +194,8 @@ class _ChatBubble extends StatelessWidget {
     );
   }
 }
+
+// ... (keep _ChatHeader and _ChatMessages as they are)
 
 class _MessageInput extends StatefulWidget {
   final String receiverId;
@@ -129,6 +208,13 @@ class _MessageInput extends StatefulWidget {
 
 class __MessageInputState extends State<_MessageInput> {
   final _controller = TextEditingController();
+  late SocketService _socketService;
+
+  @override
+  void initState() {
+    super.initState();
+    _socketService = Provider.of<SocketService>(context, listen: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,19 +234,24 @@ class __MessageInputState extends State<_MessageInput> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: const Color.fromARGB(65, 9, 119, 146),
+                fillColor: const Color.fromARGB(72, 53, 108, 247),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.send, color: Color(0xFF097792)),
+            icon: const Icon(Icons.send, color: Color(0xFF4A86F7)),
             onPressed: () {
               if (_controller.text.isNotEmpty) {
-                context
-                    .read<ChatBloc>()
-                    .add(SendMessage(widget.receiverId, _controller.text));
+                final message = Message(
+                  text: _controller.text,
+                  sender: 'me', // Replace with actual sender ID
+                  receiver: widget.receiverId,
+                  timestamp: DateTime.now(),
+                );
+                _socketService.sendMessage(message.toJson());
+                context.read<ChatBloc>().add(SendMessage(message));
                 _controller.clear();
               }
             },

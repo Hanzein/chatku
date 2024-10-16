@@ -9,7 +9,6 @@ class FirebaseUserRepo implements UserRepository {
   final usersCollection = FirebaseFirestore.instance.collection('users');
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-
   FirebaseUserRepo({
     FirebaseAuth? firebaseAuth,
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
@@ -24,20 +23,17 @@ class FirebaseUserRepo implements UserRepository {
   @override
   Future<UserCredential> signIn(String email, String password) async {
     try {
-      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-          email: email, password: password);
-
-      _firestore.collection("Users").doc(userCredential.user!.uid).set(
-          {
-            'uid': userCredential.user!.uid,
-            'email': email,
-          }
-      );
-      log('Halah jn: ${userCredential.user!.uid}', name: 'Firetool');
-      print('Balak jn: ${userCredential.user!.uid}');
+      UserCredential userCredential = await _firebaseAuth
+          .signInWithEmailAndPassword(email: email, password: password);
+      _firestore.collection("Users").doc(userCredential.user!.uid).set({
+        'uid': userCredential.user!.uid,
+        'email': email,
+      });
+      log('User signed in: ${userCredential.user!.uid}', name: 'Firetool');
+      print('User signed in: ${userCredential.user!.uid}');
       return userCredential;
     } catch (e) {
-      log("Error during Firestore write: ${e.toString()}");
+      log("Error during sign in: ${e.toString()}");
       rethrow;
     }
   }
@@ -47,12 +43,11 @@ class FirebaseUserRepo implements UserRepository {
     try {
       UserCredential user = await _firebaseAuth.createUserWithEmailAndPassword(
           email: myUser.email, password: password);
-
       myUser = myUser.copyWith(userId: user.user!.uid);
-
+      await setUserData(myUser); // Save the user data to Firestore
       return myUser;
     } catch (e) {
-      log(e.toString());
+      log("Error during sign up: ${e.toString()}");
       rethrow;
     }
   }
@@ -64,13 +59,42 @@ class FirebaseUserRepo implements UserRepository {
           .doc(myUser.userId)
           .set(myUser.toEntity().toDocument());
     } catch (e) {
-      log(e.toString());
+      log("Error setting user data: ${e.toString()}");
       rethrow;
     }
   }
 
   @override
   Future<void> logOut() async {
-    await _firebaseAuth.signOut();
+    try {
+      await _firebaseAuth.signOut();
+    } catch (e) {
+      log("Error during logout: ${e.toString()}");
+      rethrow;
+    }
+  }
+
+  // New method to get the Firebase ID token
+  Future<String?> getIdToken() async {
+    try {
+      User? user = _firebaseAuth.currentUser;
+      if (user != null) {
+        return await user.getIdToken();
+      }
+      return null;
+    } catch (e) {
+      log("Error getting ID token: ${e.toString()}");
+      return null;
+    }
+  }
+
+  // Optional: Method to get the current user
+  User? getCurrentUser() {
+    return _firebaseAuth.currentUser;
+  }
+
+  // Optional: Method to check if a user is signed in
+  bool isSignedIn() {
+    return _firebaseAuth.currentUser != null;
   }
 }

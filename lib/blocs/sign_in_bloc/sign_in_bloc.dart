@@ -24,12 +24,11 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
             email: event.email, password: event.password);
 
         print('Trying to write to Firestore');
-        _firestore.collection("Users").doc(userCredential.user!.uid).set(
-            {
-              'uid': userCredential.user!.uid,
-              'email': event.email
-            }
-        ).then((value) => print("User added successfully"))
+        _firestore
+            .collection("Users")
+            .doc(userCredential.user!.uid)
+            .set({'uid': userCredential.user!.uid, 'email': event.email})
+            .then((value) => print("User added successfully"))
             .catchError((error) => print("Failed to add user: $error"));
 
         emit(SignInSuccess());
